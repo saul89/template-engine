@@ -35,12 +35,12 @@ const memberQuestions = [
   },
   {
     name: "mail",
-    message: "What is Team Memeber´s Email?"
+    message: "What is the Team Memeber´s Email?"
   },
   {
     type: "list",
     name: "role",
-    message: "What is Team Memeber´s Role in the company?",
+    message: "What is the Team Memeber´s Role in the company?",
     choices: ["Intern", "Engineer"]
   },
   {
@@ -52,7 +52,7 @@ const memberQuestions = [
   },
   {
     name: "github",
-    message: "What is Team Memeber´s GitHub Username?",
+    message: "What is the Team Memeber´s GitHub Username?",
     when: function(answers) {
       return answers.role == "Engineer";
     }
