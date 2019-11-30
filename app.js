@@ -38,8 +38,10 @@ const memberQuestions = [
     message: "What is Team Memeber´s Email?"
   },
   {
+    type: "list",
     name: "role",
-    message: "What is Team Memeber´s Role in the company?"
+    message: "What is Team Memeber´s Role in the company?",
+    choices: ["Intern", "Engineer"]
   },
   {
     name: "school",
