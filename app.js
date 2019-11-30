@@ -1,5 +1,8 @@
 const inquirer = require("inquirer");
-const fs = require("fs");
+const fs = require("fs").promises;
+const Manager = require("./lib/Manager");
+const Engineer = require("./lib/Engineer");
+const Intern = require("./lib/Intern");
 let team = [];
 
 const managerQuestions = [
@@ -66,25 +69,62 @@ async function teamQuestions() {
   async function addMember() {
     const teamMembers = await inquirer.prompt(memberQuestions);
     team.push(teamMembers);
-    return teamMembers.anotherMember ? addMember() : console.log(team);
+    return teamMembers.anotherMember ? addMember() : generateHTML(team);
   }
   addMember();
 }
 
-async function getHtmls() {
-  let main = fs.readFile("templates/main.html", "utf8", (err, data) => {
-    console.log(data);
+async function generateHTML(team) {
+  let main = await fs.readFile("templates/main.html", "utf8");
+  let engineer = await fs.readFile("templates/engineer.html", "utf8");
+  let manager = await fs.readFile("templates/manager.html", "utf8");
+  let intern = await fs.readFile("templates/intern.html", "utf8");
+  let managerObj = new Manager(
+    team[0].name,
+    team[0].id,
+    team[0].mail,
+    team[0].officeNumber
+  );
+  let internArray = team.filter(member => member.role == "Intern");
+  let engineerArray = team.filter(member => member.role == "Engineer");
+  let arrInternObj = internArray.map(
+    intern => new Intern(intern.name, intern.id, intern.mail, intern.school)
+  );
+  let arrEngineerObj = engineerArray.map(
+    engineer =>
+      new Engineer(engineer.name, engineer.id, engineer.mail, engineer.github)
+  );
+
+  let managerHTML = manager
+    .replace(/{{name}}/g, managerObj.name)
+    .replace(/{{id}}/g, managerObj.id)
+    .replace(/{{email}}/g, managerObj.email)
+    .replace(/{{office}}/g, managerObj.officeNumber);
+
+  let rosterHTML = managerHTML;
+
+  let internHTML = arrInternObj.forEach(internEl => {
+    rosterHTML += intern
+      .replace(/{{name}}/g, internEl.name)
+      .replace(/{{id}}/g, internEl.id)
+      .replace(/{{email}}/g, internEl.email)
+      .replace(/{{school}}/g, internEl.school);
   });
-  let engineer = fs.readFile("templates/engineer.html", "utf8", (err, data) => {
-    console.log(data);
+
+  let engineerHTML = arrEngineerObj.forEach(engineerEl => {
+    rosterHTML += engineer
+      .replace(/{{name}}/g, engineerEl.name)
+      .replace(/{{id}}/g, engineerEl.id)
+      .replace(/{{email}}/g, engineerEl.email)
+      .replace(/{{github}}/g, engineerEl.github);
   });
-  let manager = fs.readFile("templates/manager.html", "utf8", (err, data) => {
-    console.log(data);
-  });
-  let intern = fs.readFile("templates/intern.html", "utf8", (err, data) => {
-    console.log(data);
+
+  let teamHTML = main.replace(/{{rosterHTML}}/g, rosterHTML);
+
+  fs.writeFile("output/team.html", teamHTML, function(err) {
+    if (err) throw err;
+    console.log("Saved!");
   });
 }
 
-getHtmls();
 teamQuestions();
